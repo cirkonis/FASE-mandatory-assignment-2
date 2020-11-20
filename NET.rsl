@@ -25,7 +25,7 @@ class
 
     -- aux function get stop 
 
-    getStop: StopId >< StopId -> Stop
+    getStop: StopId >< Stop-list -> Stop
     getStop(stpId, stpList) is 
     if stpList = <..> then ("", null)
         else
@@ -42,7 +42,7 @@ class
     insertStop(stp,cap,net) is
     let (sl,cl)=net, h=sl union <.(stp,cap).> in
     <.(h,cl).>
-    end,
+    end
 
 
   value /* observers */
