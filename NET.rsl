@@ -38,7 +38,7 @@ class
     if stpList = <..> then ("", null)
         else
         let stp = hd(stpList), (si, c) = stp in
-        if stopId = si then stop
+        if stopId = si then stp
         else 
             getStop(stpId, tl(stpList)) 
         end
