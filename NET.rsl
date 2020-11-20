@@ -9,8 +9,6 @@ class
     Connection = (Capacity >< DrivingTime >< Headway >< Stop >< Stop ),
     Stop = (StopId >< Capacity),
     Net = (Stop-list >< Connection-list)
-    /*Net = ((Stop >< Stop) >< Capacity)-list >< Stop-list*/
-    /*Net = ((Stop >< Stop) >< Capacity)-list*/
 
   value /* generators */
     empty :  Net = (<..>, <..>), 
@@ -20,7 +18,7 @@ class
     insertStop(stp,cap,net) is
     let (sl,cl)=net, h=sl union <.(stp,cap).> in
     <.(h,cl).>
-    end
+    end,
 
 /*
     -- add a connection between given stops, 
@@ -29,14 +27,24 @@ class
     ... 
 */
 
+    -- aux function get stop 
+
+    getStop: StopId >< StopId -> Stop
+    getStop(stpId, stpList) is 
+    if stpList = <..> then ("", null)
+        else
+        let stp = hd(stpList), (si, c) = stp in
+        if stopId = si then stop
+        else 
+            getStop(stpId, tl(stpList)) 
+        end
+
+
   value /* observers */
    
     isIn : StopId >< Net -> Bool
     isIn(stpId, Net) is
     let stopList = hd(net),
-
- /*made a change here*/
-
 
     -- get the capacity of a stop 
     capacity : StopId >< Net -~-> Capacity
