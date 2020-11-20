@@ -14,11 +14,7 @@ class
     empty :  Net = (<..>, <..>), 
 
 
-    insertStop : StopId >< Capacity >< Net -> Net
-    insertStop(stp,cap,net) is
-    let (sl,cl)=net, h=sl union <.(stp,cap).> in
-    <.(h,cl).>
-    end,
+
 
 /*
     -- add a connection between given stops, 
@@ -38,6 +34,15 @@ class
         else 
             getStop(stpId, tl(stpList)) 
         end
+        end
+    end,
+    
+
+    insertStop : StopId >< Capacity >< Net -> Net
+    insertStop(stp,cap,net) is
+    let (sl,cl)=net, h=sl union <.(stp,cap).> in
+    <.(h,cl).>
+    end,
 
 
   value /* observers */
