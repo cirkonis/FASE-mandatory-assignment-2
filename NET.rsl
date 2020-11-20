@@ -35,7 +35,7 @@ class
     isIn(stpId, Net) is
     let stopList = hd(net),
 
- 
+ /*made a change here*/
 
 
     -- get the capacity of a stop 
