@@ -48,39 +48,4 @@ class
         end
       end
     end
-    
 end
-/*
-    isIn : StopId >< Net -> Bool
-    isIn(stpId, Net) is
-    let stopList = hd(net) in
-*/
-
- 
-
-/*
-    -- get the capacity of a stop 
-    capacity : StopId >< Net -~-> Capacity
-    ...,
-
-    -- check whether two stops are directly connected in a network        
-    areDirectlyConnected : StopId >< StopId >< Net -> Bool
-    ...,
-
-    -- get minimum headway between two connected stops        
-    minHeadway : StopId >< StopId >< Net -~-> Headway
-    ..., 
-
-   -- get the capacity for a connection between two connected stops
-    capacity : StopId >< StopId >< Net -~-> Capacity
-    ...,
- 
-    -- get minimum driving time between two connected stops        
-    minDrivingTime : StopId >< StopId >< Net -~-> DrivingTime
-    ...
-
- 
-  value
-    isWellformed : Net -> Bool
-    isWellformed(n) is ...
-/*

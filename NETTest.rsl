@@ -1,4 +1,4 @@
-scheme NET =
+scheme NETTest =
 class
   type 
     Time = Nat, 
@@ -15,12 +15,11 @@ class
   value /* generators */
     empty :  Net = (<..>, <..>), 
 
-
     insertStop : StopId >< Capacity >< Net -> Net
-    insertStop(stp,cap,net) is
-    let (sl,cl)=net, h=sl ^ <.(stp,cap).> in
-    <.(h,cl).>
-    end,
+    insertStop(stopid, cap, net) is 
+        let (sl, cl) = net, h = (sl ^ <.(stopid, cap).>) in 
+          (h, cl) 
+        end, 
 
 
     -- add a connection between given stops, 
@@ -38,7 +37,7 @@ class
     getStop : StopId >< Stop-list -> Stop
     getStop(stpid, sl) is
     if sl = <..>
-      then ("",null)
+      then ("",0)
     else
       let stp = hd(sl), (si,c)=stp in
         if stpid = si
@@ -48,39 +47,4 @@ class
         end
       end
     end
-    
 end
-/*
-    isIn : StopId >< Net -> Bool
-    isIn(stpId, Net) is
-    let stopList = hd(net) in
-*/
-
- 
-
-/*
-    -- get the capacity of a stop 
-    capacity : StopId >< Net -~-> Capacity
-    ...,
-
-    -- check whether two stops are directly connected in a network        
-    areDirectlyConnected : StopId >< StopId >< Net -> Bool
-    ...,
-
-    -- get minimum headway between two connected stops        
-    minHeadway : StopId >< StopId >< Net -~-> Headway
-    ..., 
-
-   -- get the capacity for a connection between two connected stops
-    capacity : StopId >< StopId >< Net -~-> Capacity
-    ...,
- 
-    -- get minimum driving time between two connected stops        
-    minDrivingTime : StopId >< StopId >< Net -~-> DrivingTime
-    ...
-
- 
-  value
-    isWellformed : Net -> Bool
-    isWellformed(n) is ...
-/*

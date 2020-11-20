@@ -47,18 +47,16 @@ class
           getStop(stpid,tl(sl))
         end
       end
-    end
+    end,
     
-end
-/*
+
     isIn : StopId >< Net -> Bool
     isIn(stpId, Net) is
-    let stopList = hd(net) in
-*/
+    let stopList = hd(net),
 
  
 
-/*
+
     -- get the capacity of a stop 
     capacity : StopId >< Net -~-> Capacity
     ...,
@@ -80,7 +78,7 @@ end
     ...
 
  
-  value
+  value /* predicates to check nets */
     isWellformed : Net -> Bool
     isWellformed(n) is ...
-/*
+end
