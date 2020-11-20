@@ -41,7 +41,7 @@ class
     else
       let stp = hd(sl), (si,c)=stp in
         if stpid = si
-          then stop
+          then stp
         else
           getStop(stpid,tl(sl))
         end
