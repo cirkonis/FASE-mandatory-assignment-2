@@ -20,5 +20,26 @@ scheme test =
 	      getStop("ab",<.("ab",3),("bc",2),("cd",5).>),
 
       [t4]
-	      addConnection("ab", "bc", 1, 4, 2, insertStop("bc", 2,insertStop(stID, cap, nett)))
+	      addConnection("ab", "bc", 1, 4, 2, insertStop("bc", 2,insertStop(stID, cap, nett))),
+
+      [t5]
+      capacity("ab", addConnection("ab", "bc", 1, 4, 2, insertStop("bc", 2,insertStop(stID, cap, nett)))),
+
+      [t6]
+      correctCapacity(addConnection("ab", "bc", 1, 4, 2, insertStop("bc", 2,insertStop(stID, cap, nett)))),
+
+      [t7]
+      correctCapacity(addConnection("ab", "bc", 1, 4, 2, insertStop("bc", 0,insertStop(stID, cap, nett)))),
+
+      [t8]
+      correctStops(<.("ab",3),("bc",2),("cd",5).>),
+
+      [t9]
+      correctStops(<.("ab",3),("bc",2),("cd",5), ("ab",5).>),
+
+      [t10]
+      isIn("ab",addConnection("ab", "bc", 1, 4, 2, insertStop("bc", 2,insertStop(stID, cap, nett)))),
+
+      [t11]
+      capacity("ab","bc", addConnection("ab", "bc", 1, 4, 2, insertStop("bc", 2,insertStop(stID, cap, nett))))
   end

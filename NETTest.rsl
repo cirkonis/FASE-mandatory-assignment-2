@@ -33,6 +33,36 @@ class
 
 
   value /* observers */
+
+    isIn : StopId >< Net -> Bool
+    isIn(si, net) is
+    let(sl,cl) = net, stp = getStop(si,sl) in
+        if stp = ("",0) then
+            false
+        else
+            true
+        end
+    end,
+
+    getConnection : Stop >< Stop >< Connection-list -> Connection
+    getConnection(stpOne, stpTwo, cl) is
+    if cl = <..> then
+        (("",0),("",0),0,0,0)
+    else
+        let con = hd(cl), (s1, s2, hw, cap, dt) = con in
+            if ((stpOne = s1 /\ stpTwo = s2)\/(stpOne = s2 /\ stpTwo = s1)) then
+                con
+            else
+                getConnection(stpOne, stpTwo, tl(cl))
+            end
+        end
+    end,
+
+    capacity : StopId >< StopId >< Net -> Capacity
+    capacity(siOne, siTwo, net) is
+    let(sl,cl) = net, stpOne = getStop(siOne,sl), stpTwo = getStop(siTwo, sl), (csOne, csTwo, hw, cap, dt) = getConnection(stpOne, stpTwo, cl) in
+        cap
+    end,
    
     getStop : StopId >< Stop-list -> Stop
     getStop(stpid, sl) is
@@ -46,5 +76,54 @@ class
           getStop(stpid,tl(sl))
         end
       end
+    end,
+    
+    capacity : StopId >< Net -> Capacity
+    capacity(si, net) is
+    let (stoplist, cl) = net, (x, cap) = getStop(si, stoplist) in
+    cap
+    end,
+
+
+    correctCapacity : Net -> Bool
+    correctCapacity(net) is
+    let (sl,cl) = net in
+        if sl = <..> then
+            true
+        else
+            let h = hd(sl), (si, cap) = h in
+                if capacity(si, net) <=0 then
+                    false
+                else
+                    correctCapacity((tl(sl), cl))
+                end
+            end
+        end
+    end,
+
+    correctStopsAux : Stop >< Stop-list -> Bool
+    correctStopsAux(s, sl) is
+    if sl = <..> then
+        true
+    else
+        let (si, cap) = s, (siNew, capNew) = hd(sl) in
+            if si = siNew then
+                false
+            else
+                correctStopsAux(s, tl(sl))
+            end
+        end
+    end,
+
+    correctStops : Stop-list -> Bool
+    correctStops(sl) is
+    if sl = <..> then
+        true
+    else
+        if correctStopsAux(hd(sl), tl(sl)) = true then
+            correctStops(tl(sl))
+        else
+            false
+        end
     end
 end
