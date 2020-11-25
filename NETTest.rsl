@@ -63,6 +63,39 @@ class
     let(sl,cl) = net, stpOne = getStop(siOne,sl), stpTwo = getStop(siTwo, sl), (csOne, csTwo, hw, cap, dt) = getConnection(stpOne, stpTwo, cl) in
         cap
     end,
+
+    auxAreConnected : Stop >< Stop >< Connection-list -> Bool
+    auxAreConnected(stp1, stp2, cl) is
+    if cl = <..> then
+        false
+    else
+        let (cs1, cs2, hw, cap, dt) = hd(cl) in
+            if ((stp1 = cs1 /\ stp2 = cs2) \/ (stp1 = cs2 /\ stp2 = cs1)) then
+                true
+            else
+                auxAreConnected(stp1, stp2, tl(cl))
+            end
+        end
+    end,
+
+
+    areDirectlyConnected : StopId >< StopId >< Net -> Bool
+    areDirectlyConnected(siOne, siTwo, net) is
+    let (sl,cl) = net, stp1 = getStop(siOne, sl), stp2 = getStop(siTwo, sl) in
+        auxAreConnected(stp1, stp2, cl)
+    end,
+
+    minHeadway : StopId >< StopId >< Net -> Headway
+    minHeadway(siOne, siTwo, net) is
+    let(sl,cl) = net, stpOne = getStop(siOne,sl), stpTwo = getStop(siTwo, sl), (csOne, csTwo, hw, cap, dt) = getConnection(stpOne, stpTwo, cl) in
+        hw
+    end,
+
+    minDrivingTime : StopId >< StopId >< Net -> DrivingTime
+    minDrivingTime(siOne, siTwo, net) is
+    let(sl,cl) = net, stpOne = getStop(siOne,sl), stpTwo = getStop(siTwo, sl), (csOne, csTwo, hw, cap, dt) = getConnection(stpOne, stpTwo, cl) in
+        dt
+    end,
    
     getStop : StopId >< Stop-list -> Stop
     getStop(stpid, sl) is
@@ -125,5 +158,61 @@ class
         else
             false
         end
+    end,
+
+    correctConnectionCapacity : Connection-list -> Bool
+    correctConnectionCapacity(cl) is
+    if cl = <..> then
+        true
+    else
+        let (stp1, stp2, hw, cap, dt) = hd(cl) in
+            if cap <=0 then
+                false
+            else
+                correctConnectionCapacity(tl(cl))
+            end
+        end
+    end,
+
+    correctConnectionHeadway : Connection-list -> Bool
+    correctConnectionHeadway(cl) is
+    if cl = <..> then
+        true
+    else
+        let (stp1, stp2, hw, cap, dt) = hd(cl) in
+            if hw <=0 then
+                false
+            else
+                correctConnectionHeadway(tl(cl))
+            end
+        end
+    end,
+    
+    correctConnectionDrivingTime : Connection-list -> Bool
+    correctConnectionDrivingTime(cl) is
+    if cl = <..> then
+        true
+    else
+        let (stp1, stp2, hw, cap, dt) = hd(cl) in
+            if dt <=0 then
+                false
+            else
+                correctConnectionDrivingTime(tl(cl))
+            end
+        end
     end
+
+  value /* Predicates to check nets */
+    
+    isWellformed : Net -> Bool
+    isWellformed(net) is
+    let (sl,cl) = net in
+        correctCapacity(net)
+        /\correctStops(sl)
+        /\correctConnectionCapacity(cl)
+        /\correctConnectionDrivingTime(cl)
+        /\correctConnectionHeadway(cl)
+    end
+
+    
 end
