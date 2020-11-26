@@ -1,0 +1,63 @@
+NETTest
+scheme TIMETABLE = extend NETTest with
+class
+
+  type
+    TimeTable = (TramId><Plan-list)-list,  -- time tables
+    Plan = (StopId><ArrivalTime><DepartureTime),
+    TramId = Text
+
+  value  /* generators */
+-- the empty timetable
+    empty : TimeTable = <..>,
+-- add to a time table an empty plan for a new tram
+    addTram : TramId >< TimeTable -> TimeTable
+    addTram(tramId,timeTable) is timeTable ^ <.tramId,(0,0,0).> ,
+
+ 
+-- add a stop with arrival time and departure time to the plan for a given tram
+    addStop : TramId ><StopId >< Time >< Time >< TimeTable -> TimeTable
+    addStop(tramId,stopId,arrivalTime,departureTime,timeTable) is 
+      let (tId,planList)=hd(timeTable) in
+        if tId = tramId then <.tramId,planList.> ^ tl(timeTable)
+	else <.tId,planList.> ^
+	  addStop(tramId,stopId,arrivalTime,departureTime,tl(timeTable))
+	end
+      end
+
+  value /* observers */
+-- check whether a tram with a given name exists in a given time table
+    isIn : TramId >< TimeTable ->Bool
+    isIn(tramId,timeTable) is 
+      let (tId,planList)=hd(timeTable) in 
+        if tId="" then false 
+	else 
+	  if tramId=tId then true 
+	  else
+            isIn(trameId,tl(timeTable)) end
+        end
+      end,
+
+    stopIsIn : StopId><TramId><TimeTable->Bool
+    stopId(stopId,trameId,timeTable) is 
+      let (tId,planList)= hd(timeTable) in 
+        isIn(tramId,timeTable) ^ findStop(stopId,planList)
+      end,
+
+      findStop : StopId><Plan-list->Bool
+      findStop(stopId,planList) is 
+      let (stopid,aTime,dTime)=hd(planList)in 
+        if stopid=0 then false 
+	else
+	  if stopid=stopId then true 
+	  else
+	    findStop(stopId,tl(planList))end
+	end    
+      end
+-- you can add more observers here
+
+  value /* predicates to check time tables */
+    isWellformed : TimeTable >< Net ~-> Bool
+    isWellformed(t, n) = ...,
+...
+end
