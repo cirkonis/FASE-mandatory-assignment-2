@@ -5,22 +5,24 @@ class
   type
     TimeTable = (TramId><Plan-list)-list,  -- time tables
     Plan = (StopId><ArrivalTime><DepartureTime),
-    TramId = Text
+    TramId = Text,
+    ArrivalTime = Time,
+    DepartureTime = Time
 
   value  /* generators */
 -- the empty timetable
     empty : TimeTable = <..>,
 -- add to a time table an empty plan for a new tram
     addTram : TramId >< TimeTable -> TimeTable
-    addTram(tramId,timeTable) is timeTable ^ <.tramId,(0,0,0).> ,
+    addTram(tramId,timeTable) is timeTable ^ <.(tramId,<.("",0,0).>).> ,
 
  
 -- add a stop with arrival time and departure time to the plan for a given tram
     addStop : TramId ><StopId >< Time >< Time >< TimeTable -> TimeTable
     addStop(tramId,stopId,arrivalTime,departureTime,timeTable) is 
       let (tId,planList)=hd(timeTable) in
-        if tId = tramId then <.tramId,planList.> ^ tl(timeTable)
-	else <.tId,planList.> ^
+        if tId = tramId then <.(tramId,planList).> ^ tl(timeTable)
+	else <.(tId,planList).> ^
 	  addStop(tramId,stopId,arrivalTime,departureTime,tl(timeTable))
 	end
       end
@@ -34,20 +36,20 @@ class
 	else 
 	  if tramId=tId then true 
 	  else
-            isIn(trameId,tl(timeTable)) end
+            isIn(tramId,tl(timeTable)) end
         end
       end,
 
     stopIsIn : StopId><TramId><TimeTable->Bool
-    stopId(stopId,trameId,timeTable) is 
+    stopIsIn(stopId,tramId,timeTable) is 
       let (tId,planList)= hd(timeTable) in 
-        isIn(tramId,timeTable) ^ findStop(stopId,planList)
+        isIn(tramId,timeTable) /\ findStop(stopId,planList)
       end,
 
       findStop : StopId><Plan-list->Bool
       findStop(stopId,planList) is 
       let (stopid,aTime,dTime)=hd(planList)in 
-        if stopid=0 then false 
+        if stopid="" then false 
 	else
 	  if stopid=stopId then true 
 	  else
@@ -57,7 +59,6 @@ class
 -- you can add more observers here
 
   value /* predicates to check time tables */
-    isWellformed : TimeTable >< Net ~-> Bool
-    isWellformed(t, n) = ...,
-...
+    isWellformed : TimeTable >< Net -> Bool
+    isWellformed(t, n) is true
 end
