@@ -1,0 +1,81 @@
+TIMETABLE
+	
+scheme test_for_TIMETABLE = 
+  extend TIMETABLE with 
+  class 
+    value 
+      nett : Net = (<..>, <..>), 
+      stID : Text = "ab", 
+      cap : Nat = 3, 
+      exNet : Net = 
+        (<.("A", 2), ("B", 6), ("C", 2), ("D", 2).>, 
+         <.(("A", 2), ("B", 6), 1, 1, 10), 
+           (("B", 6), ("C", 2), 2, 3, 12), 
+           (("B", 6), ("D", 2), 2, 2, 7).>), 
+      timeTable1 : TimeTable = 
+        <.("tram1", 
+           <.("A", 0, 1), ("B", 12, 14), ("C", 28, 32), 
+             ("B", 46, 48), ("A", 59, 60).>), /*the same example from assignment*/
+          ("tram2", 
+           <.("D", 0, 2), ("B", 11, 13), ("A", 28, 32), 
+             ("B", 47, 50), ("D", 58, 60).>), /*the same example from assignment*/
+          ("tram_1", 
+           <.("stop_1", 2, 3), ("stop_2", 4, 1), 
+             ("stop_3", 7, 3), ("stop_4", 2, 1), 
+             ("stop_5", 10, 3).>), 
+          ("tram_2", 
+           <.("stop_1", 8, 1), ("stop_2", 14, 1), 
+             ("stop_3", 17, 3), ("stop_4", 20, 1), 
+             ("stop_5", 1, 3).>), 
+          ("tram_3", 
+           <.("stop_1", 9, 2), ("stop_2", 18, 3), 
+             ("stop_3", 18, 5), ("stop_4", 22, 1), 
+             ("stop_5", 20, 2), ("stop_1", 12, 1).>), 
+          ("tram_4", 
+           <.("stop_1", 10, 3), ("stop_2", 20, 2), 
+             ("stop_3", 7, 1), ("stop_4", 23, 5), 
+             ("stop_5", 10, 4), ("stop_1", 14, 2).>).>, 
+      plan5 : Plan = ("stop_5", 2, 3), 
+      tramId5 : TramId = "tram_5", 
+      plan2 : Plan = ("stop_2", 8, 1), 
+      tramId2 : TramId = "tram_2", 
+      plan1 : Plan = ("stop_1", 2, 3), 
+      tramId1 : TramId = "tram_1", 
+      planL : Plan-list = <.plan5, plan2, plan1.> 
+    	 
+    test_case 
+      [t1] /*this should add ("stop_5",2,3) to "tram_1" in timeTable1*/
+        addStop("tram_1", "stop_5", 2, 3, timeTable1), 
+      [t2] /*this should add ("B",46,48) to "tram1" in timeTable1*/
+        addStop("tram1", "B", 46, 48, timeTable1), 
+      [t3] /*this should add ("stop_6",46,48) to "tram_2" in timeTable1*/
+        addStop("tram_2", "stop_6", 46, 48, timeTable1), 
+      [t4] /*it checks if "tram_1" in in timetable1------->tru 
+      e*/
+        isIn(tramId1, timeTable1), 
+      [t5] /*it checks if "tram_7" in in timetable1------->fal 
+      se*/
+        isIn("tram_7", timeTable1), 
+      [t6] /*it checks if "stop_4"is in the "tram_4" in in 
+      timetable1----->true*/
+        stopIsIn("stop_4", "tram_4", timeTable1), 
+      [t7] /*it checks if "stop_4" is in the "tram2" in in 
+      timetable1----->false*/
+        stopIsIn("stop_4", "tram2", timeTable1), 
+      [t8] /*if it can find "stop_1" in planL------>true 
+      */
+        findStop("stop_1", planL), 
+      [t9] /*if it can find "stop_3" in planL------>false 
+      */
+        findStop("stop_3", planL) 
+  --[t9]
+  --isWellformed(t, n),
+  --[t10]
+  --isWellformed(t, n),
+  --[t10]
+  --isWellformed(t, n),
+  --[t10]
+  --isWellformed(t, n),
+  --[t10]
+  --isWellformed(t, n)
+  end
