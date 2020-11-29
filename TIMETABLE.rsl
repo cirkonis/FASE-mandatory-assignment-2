@@ -55,10 +55,95 @@ class
 	  else
 	    findStop(stopId,tl(planList))end
 	end    
-      end
--- you can add more observers here
+      end,
+
+  
+    correctTramIdsAux : (TramId >< Plan-list) >< Timetable -> Bool
+    correctTramIdsAux(head, timeTable) is
+    if timeTable = <..> then
+        true
+    else
+        let (tramId, planList) = head, (tid, pList) = hd(timeTable) in
+            if tramId = tid then
+                false
+            else
+                correctTramIdsAux(head, tl(timeTable))
+            end
+        end
+    end,
+
+    correctTramIds : Timetable -> Bool
+    correctTramIds(timeTable) is
+    if timeTable = <..> then
+        true
+    else
+        if correctTramIdsAux(hd(timeTable), tl(timeTable)) = true then
+            correctTramIds(tl(Timetable))
+        else
+            false
+        end
+    end,
+
+    correctStopPlanAux : Plan >< Plan-list -> Bool
+    correctStopPlanAux(head, planList) is
+    if planList = <..> then
+        true
+    else
+        let (stopId, aTime, dTime) = head, (sid, at, dt) = hd(planList) in
+            if stopId = sid then
+                false
+            else
+                correctStopPlanAux(head, tl(planList))
+            end
+        end
+    end,
+
+    correctStopPlan : Plan-list -> Bool
+    correctStopPlan(planList) is
+    if planList = <..> then
+        true
+    else
+        if correctStopPlanAux(hd(planList), tl(planList)) = true then
+            correctStopPlan(tl(planList))
+        else
+            false
+        end
+    end,
+
+    correctDepartureTime : Plan-list -> Bool
+    correctDepartureTime(planList) is
+    if planList = <..> then
+        true
+    else
+        let (stopId, aTime, dTime) = hd(planList) in
+        if dTime <= 0 then
+            false
+        else
+            correctDepartureTime(tl(planList))
+        end
+    end,
+
+    correctArrivalTime : Plan-list -> Bool
+    correctArrivalTime(planList) is
+    if planList = <..> then
+        true
+    else
+        let (stopId, aTime, dTime) = hd(planList) in
+        if aTime <= 0 then
+            false
+        else
+            correctArrivalTime(tl(planList))
+        end
+    end
+
 
   value /* predicates to check time tables */
     isWellformed : TimeTable >< Net -> Bool
-    isWellformed(t, n) is true
+    isWellformed(timeTable, net) is
+    let (tid,planList) = hd(timeTable) in
+        correctTramIds(timeTable)
+        /\correctStopPlan(planList)
+        /\correctArrivalTime(planList)
+        /\correctDepartureTime(planList)
+    end
 end
