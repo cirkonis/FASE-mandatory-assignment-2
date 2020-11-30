@@ -58,7 +58,7 @@ class
       end,
 
   
-    correctTramIdsAux : (TramId >< Plan-list) >< Timetable -> Bool
+    correctTramIdsAux : (TramId >< Plan-list) >< TimeTable -> Bool
     correctTramIdsAux(head, timeTable) is
     if timeTable = <..> then
         true
@@ -72,13 +72,13 @@ class
         end
     end,
 
-    correctTramIds : Timetable -> Bool
+    correctTramIds : TimeTable -> Bool
     correctTramIds(timeTable) is
     if timeTable = <..> then
         true
     else
         if correctTramIdsAux(hd(timeTable), tl(timeTable)) = true then
-            correctTramIds(tl(Timetable))
+            correctTramIds(tl(timeTable))
         else
             false
         end
@@ -121,6 +121,8 @@ class
         else
             correctDepartureTime(tl(planList))
         end
+    end
+
     end,
 
     correctArrivalTime : Plan-list -> Bool
@@ -132,7 +134,7 @@ class
         if aTime <= 0 then
             false
         else
-            correctArrivalTime(tl(planList))
+            correctArrivalTime(tl(planList)) end
         end
     end
 
