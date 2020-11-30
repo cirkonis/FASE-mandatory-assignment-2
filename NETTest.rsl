@@ -66,12 +66,10 @@ class
 
     auxAreConnected : Stop >< Stop >< Connection-list -> Bool
     auxAreConnected(stp1, stp2, cl) is
-    if cl = <..> then
-        false
+    if cl = <..> then false
     else
         let (cs1, cs2, hw, cap, dt) = hd(cl) in
-            if ((stp1 = cs1 /\ stp2 = cs2) \/ (stp1 = cs2 /\ stp2 = cs1)) then
-                true
+            if ((stp1 = cs1 /\ stp2 = cs2) \/ (stp1 = cs2 /\ stp2 = cs1)) then true
             else
                 auxAreConnected(stp1, stp2, tl(cl))
             end
