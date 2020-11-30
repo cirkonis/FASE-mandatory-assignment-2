@@ -27,7 +27,7 @@ class
     addConnection(startid, stpid, hw, c, dt, net) is
     let (sl,cl) = net, stpidOne = getStop(startid, sl), stpidTwo = getStop(stpid, sl) in
     (sl, cl ^ <.(stpidOne, stpidTwo, hw, c, dt).>)
-    end
+    end,
 
 
 
