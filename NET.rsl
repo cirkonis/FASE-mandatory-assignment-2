@@ -9,16 +9,17 @@ class
     Connection = (Stop >< Stop >< Headway >< Capacity >< DrivingTime),
     Stop = (StopId >< Capacity),
     Net = (Stop-list >< Connection-list)
+    /*Net = ((Stop >< Stop) >< Capacity)-list >< Stop-list*/
+    /*Net = ((Stop >< Stop) >< Capacity)-list*/
 
   value /* generators */
     empty :  Net = (<..>, <..>), 
 
-
     insertStop : StopId >< Capacity >< Net -> Net
-    insertStop(stp,cap,net) is
-    let (sl,cl)=net, h=sl ^ <.(stp,cap).> in
-    <.(h,cl).>
-    end,
+    insertStop(stopid, cap, net) is 
+        let (sl, cl) = net, h = (sl ^ <.(stopid, cap).>) in 
+          (h, cl) 
+        end, 
 
 
     -- add a connection between given stops, 
@@ -31,73 +32,289 @@ class
 
 
 
-    -- aux function get stop 
+  value /* observers */
 
-    getStop: StopId >< Stop-list -> Stop
-    getStop(stpId, stpList) is 
-    if stpList = <..> then ("", null)
+    isIn : StopId >< Net -> Bool
+    isIn(si, net) is
+    let(sl,cl) = net, stp = getStop(si,sl) in
+        if stp = ("",0) then
+            false
         else
-        let stp = hd(stpList), (si, c) = stp in
-        if stopId = si then stp
-        else 
-            getStop(stpId, tl(stpList)) 
-        end
+            true
         end
     end,
-    
 
-    insertStop : StopId >< Capacity >< Net -> Net
-    insertStop(stp,cap,net) is
-    let (sl,cl)=net, h=sl union <.(stp,cap).> in
-    <.(h,cl).>
-    end
+    getConnection : Stop >< Stop >< Connection-list -> Connection
+    getConnection(stpOne, stpTwo, cl) is
+    if cl = <..> then
+        (("",0),("",0),0,0,0)
+    else
+        let con = hd(cl), (s1, s2, hw, cap, dt) = con in
+            if ((stpOne = s1 /\ stpTwo = s2)\/(stpOne = s2 /\ stpTwo = s1)) then
+                con
+            else
+                getConnection(stpOne, stpTwo, tl(cl))
+            end
+        end
+    end,
+
+    capacity : StopId >< StopId >< Net -> Capacity
+    capacity(siOne, siTwo, net) is
+    let(sl,cl) = net, stpOne = getStop(siOne,sl), stpTwo = getStop(siTwo, sl), (csOne, csTwo, hw, cap, dt) = getConnection(stpOne, stpTwo, cl) in
+        cap
+    end,
+
+    auxAreConnected : Stop >< Stop >< Connection-list -> Bool
+    auxAreConnected(stp1, stp2, cl) is
+    if cl = <..> then
+        false
+    else
+        let (cs1, cs2, hw, cap, dt) = hd(cl) in
+            if ((stp1 = cs1 /\ stp2 = cs2) \/ (stp1 = cs2 /\ stp2 = cs1)) then
+                true
+            else
+                auxAreConnected(stp1, stp2, tl(cl))
+            end
+        end
+    end,
 
 
-  value /* observers */
+    areDirectlyConnected : StopId >< StopId >< Net -> Bool
+    areDirectlyConnected(siOne, siTwo, net) is
+    let (sl,cl) = net, stp1 = getStop(siOne, sl), stp2 = getStop(siTwo, sl) in
+        auxAreConnected(stp1, stp2, cl)
+    end,
+
+    minHeadway : StopId >< StopId >< Net -> Headway
+    minHeadway(siOne, siTwo, net) is
+    let(sl,cl) = net, stpOne = getStop(siOne,sl), stpTwo = getStop(siTwo, sl), (csOne, csTwo, hw, cap, dt) = getConnection(stpOne, stpTwo, cl) in
+        hw
+    end,
+
+    minDrivingTime : StopId >< StopId >< Net -> DrivingTime
+    minDrivingTime(siOne, siTwo, net) is
+    let(sl,cl) = net, stpOne = getStop(siOne,sl), stpTwo = getStop(siTwo, sl), (csOne, csTwo, hw, cap, dt) = getConnection(stpOne, stpTwo, cl) in
+        dt
+    end,
    
     getStop : StopId >< Stop-list -> Stop
     getStop(stpid, sl) is
     if sl = <..>
-      then ("",null)
+      then ("",0)
     else
       let stp = hd(sl), (si,c)=stp in
         if stpid = si
-          then stop
+          then stp
         else
           getStop(stpid,tl(sl))
         end
       end
+    end,
+    
+    capacity : StopId >< Net -> Capacity
+    capacity(si, net) is
+    let (stoplist, cl) = net, (x, cap) = getStop(si, stoplist) in
+    cap
+    end,
+
+
+    correctCapacity : Net -> Bool
+    correctCapacity(net) is
+    let (sl,cl) = net in
+        if sl = <..> then
+            true
+        else
+            let h = hd(sl), (si, cap) = h in
+                if capacity(si, net) <=0 then
+                    false
+                else
+                    correctCapacity((tl(sl), cl))
+                end
+            end
+        end
+    end,
+
+    checkForRealStops : Stop-list >< Connection-list -> Bool
+    checkForRealStops(sl, cl) is
+    if cl = <..> then
+        true
+    else
+        let (stp1, stp2, hw, cap, dt) = hd(cl) in
+            if stopExists(stp1,sl) /\ stopExists(stp2,sl) then
+                checkForRealStops(sl, tl(cl))
+            else
+                false
+            end
+        end
+    end,
+
+    stopExists : Stop >< Stop-list -> Bool
+    stopExists(stp, sl) is
+    if sl = <..> then
+        false
+    else
+        let stp1 = hd(sl) in
+            if stp1 = stp then
+                true
+            else
+                stopExists(stp,tl(sl))
+            end
+        end
+    end,
+
+
+
+
+    correctStopsAux : Stop >< Stop-list -> Bool
+    correctStopsAux(s, sl) is
+    if sl = <..> then
+        true
+    else
+        let (si, cap) = s, (siNew, capNew) = hd(sl) in
+            if si = siNew then
+                false
+            else
+                correctStopsAux(s, tl(sl))
+            end
+        end
+    end,
+
+    correctStops : Stop-list -> Bool
+    correctStops(sl) is
+    if sl = <..> then
+        true
+    else
+        if correctStopsAux(hd(sl), tl(sl)) = true then
+            correctStops(tl(sl))
+        else
+            false
+        end
+    end,
+
+    correctConnectionCapacity : Connection-list -> Bool
+    correctConnectionCapacity(cl) is
+    if cl = <..> then
+        true
+    else
+        let (stp1, stp2, hw, cap, dt) = hd(cl) in
+            if cap <=0 then
+                false
+            else
+                correctConnectionCapacity(tl(cl))
+            end
+        end
+    end,
+
+    correctConnectionHeadway : Connection-list -> Bool
+    correctConnectionHeadway(cl) is
+    if cl = <..> then
+        true
+    else
+        let (stp1, stp2, hw, cap, dt) = hd(cl) in
+            if hw <=0 then
+                false
+            else
+                correctConnectionHeadway(tl(cl))
+            end
+        end
+    end,
+    
+    correctConnectionDrivingTime : Connection-list -> Bool
+    correctConnectionDrivingTime(cl) is
+    if cl = <..> then
+        true
+    else
+        let (stp1, stp2, hw, cap, dt) = hd(cl) in
+            if dt <=0 then
+                false
+            else
+                correctConnectionDrivingTime(tl(cl))
+            end
+        end
+    end,
+
+    stopsConnected : Stop-list >< Connection-list -> Bool
+    stopsConnected(sl, cl) is
+    if sl = <..> then
+        true
+    else
+        let stp = hd(sl), stp1 = findDirectConnection(stp, sl, cl, (sl,cl)) in
+            if stp1 = ("",0) then
+                false
+            else
+                let stpNet = <..> ^ <.stp, stp1.> in
+                    checkForNets(remove(stp1, tl(sl),<..>), stpNet, cl, (sl,cl))
+                end
+            end
+        end
+    end,
+
+    remove : Stop >< Stop-list >< Stop-list -> Stop-list
+    remove(stp, sl, newSl) is
+    if sl = <..> then
+        newSl
+    else
+        let stp1 = hd(sl) in
+            if stp1 = stp then
+                remove(stp, tl(sl),newSl)
+            else
+                remove(stp, tl(sl), newSl ^ <.stp1.>)
+            end
+        end
+    end,
+    
+
+    checkForNets : Stop-list >< Stop-list >< Connection-list >< Net -> Bool
+    checkForNets(sl, stpNet, cl, net) is
+    if sl = <..> then
+        true
+    else
+        if directStopExists(hd(sl), stpNet, cl,net) then
+            checkForNets(tl(sl), stpNet ^ <.hd(sl).>, cl,net)
+        else
+            false
+        end
+    end,
+
+    
+    directStopExists : Stop >< Stop-list >< Connection-list >< Net -> Bool
+    directStopExists(stp, sl, cl, net) is
+    let check = findDirectConnection(stp, sl, cl, net) in
+        if check = ("",0) then
+            false
+        else
+            true
+        end
+    end,
+
+    findDirectConnection : Stop >< Stop-list >< Connection-list >< Net -> Stop
+    findDirectConnection(stp, sl, cl, net) is
+    if sl = <..> then 
+        ("",0)
+    else
+        let stp1 = hd(sl), (si, cap) = stp, (si1, cap1) = stp1 in
+            if areDirectlyConnected(si, si1, net) then
+                stp1
+            else
+                findDirectConnection(stp, tl(sl), cl, net)
+            end
+        end
     end
+
+
+
+  value /* Predicates to check nets */
+    
+    isWellformed : Net -> Bool
+    isWellformed(net) is
+    let (sl,cl) = net in
+        correctCapacity(net)
+        /\correctStops(sl)
+        /\correctConnectionCapacity(cl)
+        /\correctConnectionDrivingTime(cl)
+        /\correctConnectionHeadway(cl)
+        /\stopsConnected(sl,cl)
+    end
+
     
 end
-/*
-    isIn : StopId >< Net -> Bool
-    isIn(stpId, Net) is
-    let stopList = hd(net) in
-*/
-
-    -- get the capacity of a stop 
-    capacity : StopId >< Net -~-> Capacity
-    ...,
-
-    -- check whether two stops are directly connected in a network        
-    areDirectlyConnected : StopId >< StopId >< Net -> Bool
-    ...,
-
-    -- get minimum headway between two connected stops        
-    minHeadway : StopId >< StopId >< Net -~-> Headway
-    ..., 
-
-   -- get the capacity for a connection between two connected stops
-    capacity : StopId >< StopId >< Net -~-> Capacity
-    ...,
- 
-    -- get minimum driving time between two connected stops        
-    minDrivingTime : StopId >< StopId >< Net -~-> DrivingTime
-    ...
-
- 
-  value
-    isWellformed : Net -> Bool
-    isWellformed(n) is ...
-/*

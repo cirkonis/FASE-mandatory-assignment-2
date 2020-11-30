@@ -134,6 +134,37 @@ class
         end
     end,
 
+    checkForRealStops : Stop-list >< Connection-list -> Bool
+    checkForRealStops(sl, cl) is
+    if cl = <..> then
+        true
+    else
+        let (stp1, stp2, hw, cap, dt) = hd(cl) in
+            if stopExists(stp1,sl) /\ stopExists(stp2,sl) then
+                checkForRealStops(sl, tl(cl))
+            else
+                false
+            end
+        end
+    end,
+
+    stopExists : Stop >< Stop-list -> Bool
+    stopExists(stp, sl) is
+    if sl = <..> then
+        false
+    else
+        let stp1 = hd(sl) in
+            if stp1 = stp then
+                true
+            else
+                stopExists(stp,tl(sl))
+            end
+        end
+    end,
+
+
+
+
     correctStopsAux : Stop >< Stop-list -> Bool
     correctStopsAux(s, sl) is
     if sl = <..> then
@@ -200,7 +231,77 @@ class
                 correctConnectionDrivingTime(tl(cl))
             end
         end
+    end,
+
+    stopsConnected : Stop-list >< Connection-list -> Bool
+    stopsConnected(sl, cl) is
+    if sl = <..> then
+        true
+    else
+        let stp = hd(sl), stp1 = findDirectConnection(stp, sl, cl, (sl,cl)) in
+            if stp1 = ("",0) then
+                false
+            else
+                let stpNet = <..> ^ <.stp, stp1.> in
+                    checkForNets(remove(stp1, tl(sl),<..>), stpNet, cl, (sl,cl))
+                end
+            end
+        end
+    end,
+
+    remove : Stop >< Stop-list >< Stop-list -> Stop-list
+    remove(stp, sl, newSl) is
+    if sl = <..> then
+        newSl
+    else
+        let stp1 = hd(sl) in
+            if stp1 = stp then
+                remove(stp, tl(sl),newSl)
+            else
+                remove(stp, tl(sl), newSl ^ <.stp1.>)
+            end
+        end
+    end,
+    
+
+    checkForNets : Stop-list >< Stop-list >< Connection-list >< Net -> Bool
+    checkForNets(sl, stpNet, cl, net) is
+    if sl = <..> then
+        true
+    else
+        if directStopExists(hd(sl), stpNet, cl,net) then
+            checkForNets(tl(sl), stpNet ^ <.hd(sl).>, cl,net)
+        else
+            false
+        end
+    end,
+
+    
+    directStopExists : Stop >< Stop-list >< Connection-list >< Net -> Bool
+    directStopExists(stp, sl, cl, net) is
+    let check = findDirectConnection(stp, sl, cl, net) in
+        if check = ("",0) then
+            false
+        else
+            true
+        end
+    end,
+
+    findDirectConnection : Stop >< Stop-list >< Connection-list >< Net -> Stop
+    findDirectConnection(stp, sl, cl, net) is
+    if sl = <..> then 
+        ("",0)
+    else
+        let stp1 = hd(sl), (si, cap) = stp, (si1, cap1) = stp1 in
+            if areDirectlyConnected(si, si1, net) then
+                stp1
+            else
+                findDirectConnection(stp, tl(sl), cl, net)
+            end
+        end
     end
+
+
 
   value /* Predicates to check nets */
     
@@ -212,6 +313,7 @@ class
         /\correctConnectionCapacity(cl)
         /\correctConnectionDrivingTime(cl)
         /\correctConnectionHeadway(cl)
+        /\stopsConnected(sl,cl)
     end
 
     

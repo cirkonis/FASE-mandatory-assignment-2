@@ -1,17 +1,30 @@
-NETTest
+NET
 	
 scheme test = 
-  extend NETTest with 
+  extend NET with 
   class 
     value 
       nett : Net = (<..>,<..>), 
       stID : Text = "ab", 
       cap : Nat = 3,
+      slExNet : Stop-list = <.("A",2),("B",6),("C",2),("D",2).>,
+      clExNet : Connection-list = 
+      <.(("A",2),("B",6), 1, 1, 10),
+      (("B",6),("C",2), 2, 3, 12),
+      (("B",6),("D",2), 2, 2, 7).>,
+      clExNetFail : Connection-list = 
+      <.(("A",2),("B",6), 1, 1, 10),
+      (("B",6),("C",2), 2, 3, 12),
+      (("B",6),("D",2), 2, 2, 7), (("Q",27),("D",2), 4, 5, 14).>,
       exNet : Net = 
       (<.("A",2),("B",6),("C",2),("D",2).>,
       <.(("A",2),("B",6), 1, 1, 10),
       (("B",6),("C",2), 2, 3, 12),
-      (("B",6),("D",2), 2, 2, 7).>)
+      (("B",6),("D",2), 2, 2, 7).>),
+      exNetMissingBDCon : Net = 
+      (<.("A",2),("B",6),("C",2),("D",2).>,
+      <.(("A",2),("B",6), 1, 1, 10),
+      (("B",6),("C",2), 2, 3, 12).>)
     	 
     test_case 
       [t1] /* Excepted return value is: 2 and (<..>,<..>)*/
@@ -85,6 +98,16 @@ scheme test =
       correctConnectionDrivingTime(<.(("ab",3),("bc",2), 1, 4, 0).>),
 
       [t24] /* Expected return value is: True */
-      isWellformed(exNet)
+      isWellformed(exNet),
+
+      [t25] /* Expected return value is: False */
+      isWellformed(exNetMissingBDCon),
+
+      [t26] /* Expected return value is: true */
+      checkForRealStops(slExNet,clExNet),
+
+      [t27] /* Expected return value is: false */
+      checkForRealStops(slExNet,clExNetFail)
+
 
   end
