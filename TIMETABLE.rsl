@@ -193,14 +193,16 @@ scheme TIMETABLE =
             true 
         else
           let (tid, planList) = hd(timeTable) in
-            if (correctStopPlan(planList) /\ correctArrivalTime(planList) /\ 
-            correctDepartureTime(planList) /\ correctTimeDifference(planList)) = true then
+            if (correctArrivalTime(planList) /\correctDepartureTime(planList)/\ correctTimeDifference(planList)) = true then
                 correctPlanLists(tl(timeTable)) 
             else
                 false 
             end
         end
       end
+      /*correctStopPlan(planList)/\ */
+
+      /*/\  */
     	 
     value /* predicates to check time tables */ 
       isWellformed : TimeTable >< Net -> Bool
