@@ -34,7 +34,14 @@ scheme test_for_TIMETABLE =
           ("tram_4", 
            <.("stop_1", 10, 3), ("stop_2", 20, 2), 
              ("stop_3", 7, 1), ("stop_4", 23, 5), 
-             ("stop_5", 10, 4), ("stop_1", 14, 2).>).>, 
+             ("stop_5", 10, 4), ("stop_1", 14, 2).>).>,
+
+      timeTable2 : TimeTable =  <.("tram1", 
+           <.("A", 0, 1), ("B", 12, 14), ("C", 28, 32), 
+             ("B", 46, 48), ("A", 59, 60).>), /*the same example from assignment*/
+          ("tram2", 
+           <.("D", 0, 2), ("B", 11, 13), ("A", 28, 32), 
+             ("B", 47, 50), ("D", 58, 60).>).>, /*the same example from assignment*/
       plan5 : Plan = ("stop_5", 2, 3), 
       tramId5 : TramId = "tram_5", 
       plan2 : Plan = ("stop_2", 8, 1), 
@@ -44,38 +51,96 @@ scheme test_for_TIMETABLE =
       planL : Plan-list = <.plan5, plan2, plan1.> 
     	 
     test_case 
-      [t1] /*this should add ("stop_5",2,3) to "tram_1" in timeTable1*/
+      [t1]
+        addTram("tram_5", timeTable1), 
+      [t2] /*this should add ("stop_5",2,3) to "tram_1" in 
+      timeTable1*/
         addStop("tram_1", "stop_5", 2, 3, timeTable1), 
-      [t2] /*this should add ("B",46,48) to "tram1" in timeTable1*/
+      [t3] /*this should add ("B",46,48) to "tram1" in timeTable1 
+      */
         addStop("tram1", "B", 46, 48, timeTable1), 
-      [t3] /*this should add ("stop_6",46,48) to "tram_2" in timeTable1*/
+      [t4] /*this should add ("stop_6",46,48) to "tram_2" 
+      in timeTable1*/
         addStop("tram_2", "stop_6", 46, 48, timeTable1), 
-      [t4] /*it checks if "tram_1" in in timetable1------->tru 
+      [t5] /*it checks if "tram_1" in in timetable1------->tru 
       e*/
         isIn(tramId1, timeTable1), 
-      [t5] /*it checks if "tram_7" in in timetable1------->fal 
+      [t6] /*it checks if "tram_7" in in timetable1------->fal 
       se*/
         isIn("tram_7", timeTable1), 
-      [t6] /*it checks if "stop_4"is in the "tram_4" in in 
+      [t7] /*it checks if "stop_4"is in the "tram_4" in in 
       timetable1----->true*/
         stopIsIn("stop_4", "tram_4", timeTable1), 
-      [t7] /*it checks if "stop_4" is in the "tram2" in in 
+      [t8] /*it checks if "stop_4" is in the "tram2" in in 
       timetable1----->false*/
         stopIsIn("stop_4", "tram2", timeTable1), 
-      [t8] /*if it can find "stop_1" in planL------>true 
+      [t9] /*if it can find "stop_1" in planL------>true 
       */
         findStop("stop_1", planL), 
-      [t9] /*if it can find "stop_3" in planL------>false 
+      [t10] /*if it can find "stop_3" in planL------>false 
       */
-        findStop("stop_3", planL) 
-  --[t9]
-  --isWellformed(t, n),
-  --[t10]
-  --isWellformed(t, n),
-  --[t10]
-  --isWellformed(t, n),
-  --[t10]
-  --isWellformed(t, n),
-  --[t10]
-  --isWellformed(t, n)
+        findStop("stop_3", planL),
+ 
+      [t11]/*should return true*/
+        correctTramIdsAux(("tram1", 
+           <.("A", 0, 1), ("B", 12, 14), ("C", 28, 32), 
+             ("B", 46, 48), ("A", 59, 60).>), timeTable1),
+
+      [t12]
+	correctTramIdsAux(("tram_1", 
+           <.("stop_1", 2, 3), ("stop_2", 4, 1), 
+             ("stop_3", 7, 3), ("stop_4", 2, 1), 
+             ("stop_5", 10, 3).>), timeTable1),
+
+      [t13]
+        correctTramIds(timeTable1),
+
+      [t14]
+        correctTramIds(timeTable2),
+
+      [t15]
+        correctStopPlanAux(("A", 0, 1),  <.("A", 0, 1), ("B", 12, 14), ("C", 28, 32), 
+             ("B", 46, 48), ("A", 59, 60).>),
+
+      [t16]
+        correctStopPlanAux(plan1, <.("stop_1", 10, 3), ("stop_2", 20, 2), 
+             ("stop_3", 7, 1), ("stop_4", 23, 5), 
+             ("stop_5", 10, 4), ("stop_1", 14, 2).>),
+
+      [t17]
+	correctStopPlan(planL),
+
+      [t18]
+	correctStopPlan(<.("A", 0, 1), ("B", 12, 14), ("C", 28, 32), 
+             ("B", 46, 48), ("A", 59, 60).>),
+
+      [t19]
+	correctDepartureTime( <.("D", 0, 2), ("B", 11, 13), ("A", 28, 32), 
+             ("B", 47, 50), ("D", 58, 60).>),
+
+      [t20]
+	correctDepartureTime(planL),
+ 
+      [t21]
+	correctArrivalTime( <.("D", 0, 2), ("B", 11, 13), ("A", 28, 32), 
+             ("B", 47, 50), ("D", 58, 60).>),
+
+      [t22]
+        correctArrivalTime(planL),
+
+ 
+      [t23]
+        isWellformed(timeTable1,exNet),
+
+      [t24]
+        isWellformed(timeTable2,exNet),
+  
+      [t25]
+        isWellformed(timeTable1,exNet),
+   
+      [t26]
+        isWellformed(timeTable2,exNet),
+  
+      [t27]
+        isWellformed(timeTable1,exNet)
   end

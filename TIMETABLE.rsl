@@ -1,7 +1,14 @@
+<<<<<<< HEAD
+NETTest
+	
+scheme TIMETABLE = 
+  extend NETTest with 
+=======
 NET
 	
 scheme TIMETABLE = 
   extend NET with 
+>>>>>>> 9d701c197f50d8d068f6f5dd09a0e1824d7db163
   class 
     type 
       TimeTable = (TramId >< Plan-list)-list, -- time tables
