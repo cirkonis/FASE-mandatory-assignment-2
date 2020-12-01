@@ -314,6 +314,7 @@ class
         /\correctConnectionDrivingTime(cl)
         /\correctConnectionHeadway(cl)
         /\stopsConnected(sl,cl)
+        /\checkForRealStops(sl,cl)
     end
 
     
