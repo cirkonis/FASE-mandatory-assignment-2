@@ -12,6 +12,9 @@ scheme test =
       <.(("A",2),("B",6), 1, 1, 10),
       (("B",6),("C",2), 2, 3, 12),
       (("B",6),("D",2), 2, 2, 7).>,
+      clExNetFail1 : Connection-list = 
+      <.(("A",2),("B",6), 1, 1, 10),
+      (("B",6),("C",2), 2, 3, 12).>,
       clExNetFail : Connection-list = 
       <.(("A",2),("B",6), 1, 1, 10),
       (("B",6),("C",2), 2, 3, 12),
@@ -27,8 +30,7 @@ scheme test =
       (("B",6),("C",2), 2, 3, 12).>)
     	 
     test_case 
-      [t1] /* Excepted return value is: 2 and (<..>,<..>)*/
-        1 + 1, 
+      [t1] /* Excepted return value is: (<..>,<..>)*/
       nett, 
       [t2] /* Excepted return value is: (<.("ab",3).>,<..> and (<.("ab",3),("bc",2).>,<..>)*/
         insertStop(stID, cap, nett),
@@ -98,16 +100,22 @@ scheme test =
       correctConnectionDrivingTime(<.(("ab",3),("bc",2), 1, 4, 0).>),
 
       [t24] /* Expected return value is: True */
-      isWellformed(exNet),
+      stopsConnected(slExNet,clExNet),
 
-      [t25] /* Expected return value is: False */
-      isWellformed(exNetMissingBDCon),
+      [t25] /* Expected return value is: false */
+      stopsConnected(slExNet,clExNetFail1),
 
       [t26] /* Expected return value is: true */
       checkForRealStops(slExNet,clExNet),
 
       [t27] /* Expected return value is: false */
-      checkForRealStops(slExNet,clExNetFail)
+      checkForRealStops(slExNet,clExNetFail),
+
+      [t28] /* Expected return value is: false */
+      isIn("qr",addConnection("ab", "bc", 1, 4, 2, insertStop("bc", 2,insertStop(stID, cap, nett)))),
+
+       [t29] /* Expected return value is: True */
+      isWellformed(exNet)
 
 
   end

@@ -1,0 +1,29 @@
+[t1] 2
+(<..>,<..>)
+[t2] (<.("ab",3).>,<..>)
+(<.("ab",3),("bc",2).>,<..>)
+[t3] ("ab",3)
+[t4] (<.("ab",3),("bc",2).>,<.(("ab",3),("bc",2),1,4,2).>)
+[t5] 3
+[t6] true
+[t7] false
+[t8] true
+[t9] false
+[t10] true
+[t11] 4
+[t12] true
+[t13] false
+[t14] 1
+[t15] 0
+[t16] 2
+[t17] 0
+[t18] true
+[t19] false
+[t20] true
+[t21] false
+[t22] true
+[t23] false
+[t24] true
+[t25] false
+[t26] true
+[t27] false
