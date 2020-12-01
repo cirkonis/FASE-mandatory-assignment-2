@@ -14,37 +14,29 @@ scheme TIMETABLE =
     -- the empty timetable   
       empty : TimeTable = <..>, 
       	 
-      -- add to a time table an empty plan for a new
-      -- tram   
+      -- add to a time table an empty plan for a new tram   
       addTram : TramId >< TimeTable -> TimeTable
       addTram(tramId, timeTable) is 
         timeTable ^ <.(tramId, <.("", 0, 0).>).>, 
       	 
-      -- add a stop with arrival time and departure
-      -- time to the plan for a given tram 
-      addStop : 
-        TramId >< StopId >< Time >< Time >< TimeTable -> 
-          TimeTable
-      addStop(
-         tramId, stopId, arrivalTime, departureTime, 
-         timeTable) is 
-        if timeTable = <..> then <.("", <.("", 0, 0).>).> 
+      -- add a stop with arrival time and departure time to the plan for a given tram 
+      addStop : TramId >< StopId >< Time >< Time >< TimeTable -> TimeTable
+      addStop(tramId, stopId, arrivalTime, departureTime, timeTable) is 
+        if timeTable = <..> then
+            <.("", <.("", 0, 0).>).> 
         else 
           let (tId, planList) = hd (timeTable) in 
             if tId = tramId 
             then <.(tramId, planList).> ^ tl (timeTable) 
             else 
               <.(tId, planList).> ^ 
-              addStop(
-                 tramId, stopId, arrivalTime, departureTime, 
-                 tl (timeTable)) 
+              addStop(tramId, stopId, arrivalTime, departureTime, tl(timeTable)) 
             end 
           end 
         end 
     	 
     value /* observers */ 
-    -- check whether a tram with a given name exists
-    -- in a given time table   
+    -- check whether a tram with a given name exists in a given time table   
       isIn : TramId >< TimeTable -> Bool
       isIn(tramId, timeTable) is 
         let (tId, planList) = hd (timeTable) in 
@@ -71,36 +63,47 @@ scheme TIMETABLE =
       stopIsIn(stopId, tramId, timeTable) is
         let (tId, planList) = hd (timeTable) in 
           if ~isIn(tramId, timeTable) then false 
-	  else 
-	    if tId ~= tramId then 
-	      if tl(timeTable) = <..> then false 
-	      else stopIsIn(stopId,tramId,tl(timeTable)) end
-	    else findStop(stopId, planList) end
-	  end
-	end,  
+          else 
+            if tId ~= tramId then 
+              if tl(timeTable) = <..> then
+                  false 
+              else
+                  stopIsIn(stopId,tramId,tl(timeTable))
+              end
+            else
+                findStop(stopId, planList)
+            end
+          end
+	    end,  
       	
       findStop : StopId >< Plan-list -> Bool
       findStop(stopId, planList) is 
         let (stopid, aTime, dTime) = hd (planList) in 
-          if stopid = "" then false 
+          if stopid = "" then
+              false 
           else 
-            if stopid = stopId then true 
-            else if tl(planList) ~= <..> then findStop(stopId, tl
-	      (planList)) else false end 
+            if stopid = stopId then
+                true 
+            else
+                if tl(planList) ~= <..> then
+                    findStop(stopId, tl(planList))
+                else 
+                    false
+                end 
             end 
           end 
         end, 
       	
       correctTramIdsAux : (TramId >< Plan-list) >< TimeTable -> Bool
       correctTramIdsAux(head, timeTable) is 
-        if timeTable = <..> then true 
+        if timeTable = <..> then
+            true 
         else 
-          let 
-            (tramId, planList) = head, 
-            (tid, pList) = hd (timeTable) 
-          in 
-            if tramId = tid then false 
-            else correctTramIdsAux(head, tl (timeTable)) 
+          let (tramId, planList) = head, (tid, pList) = hd (timeTable) in 
+            if tramId = tid then
+                false 
+            else
+                correctTramIdsAux(head, tl (timeTable)) 
             end 
           end 
         end, 
@@ -109,69 +112,99 @@ scheme TIMETABLE =
       correctTramIds(timeTable) is 
         if timeTable = <..> then true 
         else 
-          if 
-            correctTramIdsAux(hd (timeTable), tl (timeTable)) = 
-              true 
-          then correctTramIds(tl (timeTable)) 
-          else false 
+          if correctTramIdsAux(hd (timeTable), tl (timeTable)) = true then
+              correctTramIds(tl (timeTable)) 
+          else
+              false 
           end 
         end, 
       	
       correctStopPlanAux : Plan >< Plan-list -> Bool
       correctStopPlanAux(head, planList) is 
-        if planList = <..> then true 
+        if planList = <..> then
+            true 
         else 
-          let 
-            (stopId, aTime, dTime) = head, 
-            (sid, at, dt) = hd (planList) 
-          in 
-            if stopId = sid then false 
-            else correctStopPlanAux(head, tl (planList)) 
+          let (stopId, aTime, dTime) = head, (sid, at, dt) = hd (planList) in 
+            if stopId = sid then
+                false 
+            else
+                correctStopPlanAux(head, tl (planList)) 
             end 
           end 
         end, 
       	
       correctStopPlan : Plan-list -> Bool
       correctStopPlan(planList) is 
-        if planList = <..> then true 
+        if planList = <..> then
+            true 
         else 
-          if 
-            correctStopPlanAux(hd (planList), tl (planList)) = 
-              true 
-          then correctStopPlan(tl (planList)) 
-          else false 
-          end 
+            if correctStopPlanAux(hd (planList), tl (planList)) = true then
+                correctStopPlan(tl (planList)) 
+            else
+                false 
+            end 
         end, 
       	
       correctDepartureTime : Plan-list -> Bool
       correctDepartureTime(planList) is 
-        if planList = <..> then true 
+        if planList = <..> then
+            true 
         else 
           let (stopId, aTime, dTime) = hd (planList) in 
-            if dTime <= 0 then false 
-            else correctDepartureTime(tl (planList)) 
+            if dTime < 0 then
+                false 
+            else
+                correctDepartureTime(tl (planList)) 
             end 
           end 
         end, 
       	
       correctArrivalTime : Plan-list -> Bool
       correctArrivalTime(planList) is 
-        if planList = <..> then true 
+        if planList = <..> then
+            true 
         else 
           let (stopId, aTime, dTime) = hd (planList) in 
-            if aTime <= 0 then false 
-            else correctArrivalTime(tl (planList)) 
+            if aTime < 0 then
+                false 
+            else
+                correctArrivalTime(tl (planList)) 
             end 
           end 
-        end 
+        end,
+
+      correctTimeDifference : Plan-list -> Bool
+      correctTimeDifference(planList) is
+        if planList = <..> then
+            true
+        else
+          let (stopId, aTime, dTime) = hd(planList) in
+            if dTime <= aTime then
+                false
+            else
+                correctTimeDifference(tl(planList))
+            end
+          end
+        end,
+
+      correctPlanLists : TimeTable -> Bool
+      correctPlanLists(timeTable) is 
+        if timeTable = <..> then
+            true 
+        else
+          let (tid, planList) = hd(timeTable) in
+            if (correctStopPlan(planList) /\ correctArrivalTime(planList) /\ 
+            correctDepartureTime(planList) /\ correctTimeDifference(planList)) = true then
+                correctPlanLists(tl(timeTable)) 
+            else
+                false 
+            end
+        end
+      end
     	 
     value /* predicates to check time tables */ 
       isWellformed : TimeTable >< Net -> Bool
       isWellformed(timeTable, net) is 
-        let (tid, planList) = hd (timeTable) in 
-          correctTramIds(timeTable) /\ 
-          correctStopPlan(planList) /\ 
-          correctArrivalTime(planList) /\ 
-          correctDepartureTime(planList) 
-        end 
+        correctTramIds(timeTable) /\
+        correctPlanLists(timeTable)
   end

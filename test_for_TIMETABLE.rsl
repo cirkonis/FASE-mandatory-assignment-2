@@ -11,7 +11,8 @@ scheme test_for_TIMETABLE =
         (<.("A", 2), ("B", 6), ("C", 2), ("D", 2).>, 
          <.(("A", 2), ("B", 6), 1, 1, 10), 
            (("B", 6), ("C", 2), 2, 3, 12), 
-           (("B", 6), ("D", 2), 2, 2, 7).>), 
+           (("B", 6), ("D", 2), 2, 2, 7).>),	   
+ 
       timeTable1 : TimeTable = 
         <.("tram1", 
            <.("A", 0, 1), ("B", 12, 14), ("C", 28, 32), 
@@ -41,7 +42,12 @@ scheme test_for_TIMETABLE =
              ("B", 46, 48), ("A", 59, 60).>), /*the same example from assignment*/
           ("tram2", 
            <.("D", 0, 2), ("B", 11, 13), ("A", 28, 32), 
-             ("B", 47, 50), ("D", 58, 60).>).>, /*the same example from assignment*/
+             ("B", 47, 50), ("D", 58, 60).>).>, /*the same example
+	     from assignment*/
+       timeTable3 : TimeTable =  <.("tram2", 
+           <.("D", 0, 2), ("B", 11, 13), ("A", 28, 32), 
+             ("B", 47, 50), ("D", 58, 60).>).>,
+
       plan5 : Plan = ("stop_5", 2, 3), 
       tramId5 : TramId = "tram_5", 
       plan2 : Plan = ("stop_2", 8, 1), 
@@ -49,7 +55,7 @@ scheme test_for_TIMETABLE =
       plan1 : Plan = ("stop_1", 2, 3), 
       tramId1 : TramId = "tram_1", 
       planL : Plan-list = <.plan5, plan2, plan1.> 
-    	 
+	 
     test_case 
       [t1]
         addTram("tram_5", timeTable1), 
@@ -136,10 +142,10 @@ scheme test_for_TIMETABLE =
         isWellformed(timeTable2,exNet),
   
       [t25]
-        isWellformed(timeTable1,exNet),
+        isWellformed(timeTable3,exNet),
    
       [t26]
-        isWellformed(timeTable2,exNet),
+        isWellformed(timeTable1,exNet),
   
       [t27]
         isWellformed(timeTable1,exNet)
